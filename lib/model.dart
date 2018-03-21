@@ -1,7 +1,7 @@
 import 'dart:async';
 
-abstract class Model {
+abstract class Restorable {
   save(String key);
-  Future<Model> restore(String key);
+  Future<Restorable> restore(String key);
   isInitialized();
 }

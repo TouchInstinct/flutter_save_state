@@ -1,34 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/random_words_input.dart';
 import 'package:flutter_app/random_words_model.dart';
 import 'package:english_words/english_words.dart';
 
 class RandomWords extends StatefulWidget {
-  final String modelKey;
+  final String stateKey;
 
-  RandomWords(this.modelKey);
+  RandomWords(Key key, this.stateKey) :super(key: key);
 
   @override
-  createState() => new RandomWordsState(modelKey);
+  createState() => new RandomWordsState();
 }
 
 class RandomWordsState extends State<RandomWords> {
-  String modelKey;
   RandomWordsModel model = new RandomWordsModel();
+  RandomWordsInput input = new RandomWordsInput();
 
-  final _biggerFont = const TextStyle(fontSize: 18.0);
+  final biggerFont = const TextStyle(fontSize: 18.0);
 
   final ScrollController scrollController = new ScrollController();
 
-  RandomWordsState(String stateKey) {
-    this.modelKey = stateKey;
+  RandomWordsState() {
     _init();
   }
 
   _init() async {
-    RandomWordsModel newModel = await model.restore(modelKey);
+    RandomWordsModel newModel = await model.restore(widget.stateKey);
+    RandomWordsInput newInput = await input.restore(widget.stateKey);
     setState(() {
       model = newModel;
-      scrollController.jumpTo(model.scrollPosition);
+      input = newInput;
+      scrollController.jumpTo(input.scrollPosition);
     });
   }
 
@@ -60,7 +62,7 @@ class RandomWordsState extends State<RandomWords> {
                 for (WordPair pair in newSuggestions) {
                   model.suggestions.add(pair.asPascalCase);
                 }
-                model.save(modelKey);
+                model.save(widget.stateKey);
               }
 
               return _buildRow(model.suggestions[index]);
@@ -69,16 +71,31 @@ class RandomWordsState extends State<RandomWords> {
   }
 
   _onNotification(Notification n) {
-    model.scrollPosition = scrollController.position.pixels;
-    model.save(modelKey);
+    input.scrollPosition = scrollController.position.pixels;
+    input.save(widget.stateKey);
   }
 
   Widget _buildRow(String word) {
+    final alreadySaved = model.saved.contains(word);
     return new ListTile(
       title: new Text(
         word,
-        style: _biggerFont,
+        style: biggerFont,
       ),
+      trailing: new Icon(
+        alreadySaved ? Icons.favorite : Icons.favorite_border,
+        color: alreadySaved ? Colors.red : null,
+      ),
+      onTap: () {
+        setState(() {
+          if (alreadySaved) {
+            model.saved.remove(word);
+          } else {
+            model.saved.add(word);
+          }
+        });
+        model.save(widget.stateKey);
+      },
     );
   }
 }

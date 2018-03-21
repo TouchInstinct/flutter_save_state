@@ -8,14 +8,13 @@ part of 'random_words_model.dart';
 
 RandomWordsModel _$RandomWordsModelFromJson(Map<String, dynamic> json) =>
     new RandomWordsModel()
-      ..suggestions = json['suggestions']
-      ..scrollPosition = (json['scrollPosition'] as num)?.toDouble();
+      ..suggestions =
+          (json['suggestions'] as List)?.map((e) => e as String)?.toList()
+      ..saved = (json['saved'] as List)?.map((e) => e as String)?.toList();
 
 abstract class _$RandomWordsModelSerializerMixin {
-  dynamic get suggestions;
-  double get scrollPosition;
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        'suggestions': suggestions,
-        'scrollPosition': scrollPosition
-      };
+  List<String> get suggestions;
+  List<String> get saved;
+  Map<String, dynamic> toJson() =>
+      <String, dynamic>{'suggestions': suggestions, 'saved': saved};
 }
